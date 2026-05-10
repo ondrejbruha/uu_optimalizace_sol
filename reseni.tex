@@ -1,0 +1,479 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[czech]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{tikz}
+\usetikzlibrary{patterns,arrows.meta,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\lstdefinestyle{mypy}{
+	basicstyle=\ttfamily\footnotesize,
+	keywordstyle=\color{blue!70!black}\bfseries,
+	commentstyle=\color{green!50!black}\itshape,
+	stringstyle=\color{red!70!black},
+	numbers=left, numberstyle=\tiny\color{gray},
+	numbersep=6pt, breaklines=true, tabsize=2,
+	showstringspaces=false, frame=single, framerule=0.3pt,
+	rulecolor=\color{gray!50}, language=Python
+}
+\lstset{style=mypy}
+
+\title{Vypracování úloh -- Lineární a celočíselné programování}
+\author{}
+\date{}
+
+\begin{document}
+	\maketitle
+	
+	%==============================================================
+	\section*{Úkol 1 -- Grafické řešení úlohy LP}
+	
+	Maximalizujeme
+	\[
+	z = -17x_1 + 40x_2
+	\]
+	za podmínek
+	\[
+	\begin{aligned}
+		x_1 + 2x_2 &\geq 180, \\
+		2x_1 &\leq 240, \\
+		x_1 - 3x_2 &\geq -120, \\
+		x_1, x_2 &\geq 0.
+	\end{aligned}
+	\]
+	
+	\subsection*{Hraniční přímky a oblast přípustných řešení}
+	
+	Označme
+	\[
+	L_1: x_1 + 2x_2 = 180, \qquad
+	L_2: x_1 = 120, \qquad
+	L_3: x_1 - 3x_2 = -120.
+	\]
+	
+	Najdeme průsečíky těchto přímek a otestujeme přípustnost:
+	\begin{itemize}[leftmargin=*]
+		\item $L_1 \cap L_3$: ze soustavy $x_1+2x_2=180$, $x_1-3x_2=-120$ odečtením dostaneme $5x_2=300$, tedy $x_2=60$ a $x_1=60$. Bod $A=(60,60)$. Kontrola: $60\le 120$\,\checkmark.
+		\item $L_1 \cap L_2$: $x_1=120 \Rightarrow 2x_2=60 \Rightarrow x_2=30$. Bod $B=(120,30)$. Kontrola $L_3$: $120-90=30\geq -120$\,\checkmark.
+		\item $L_2 \cap L_3$: $x_1=120 \Rightarrow 120-3x_2=-120 \Rightarrow x_2=80$. Bod $C=(120,80)$. Kontrola $L_1$: $120+160=280\geq 180$\,\checkmark.
+	\end{itemize}
+	
+	Ostatní průsečíky se souřadnicovými osami leží mimo přípustnou oblast (např. $(0,90)$ porušuje $L_3$, $(0,40)$ porušuje $L_1$, $(120,0)$ porušuje $L_1$). Oblast přípustných řešení je tedy uzavřený trojúhelník $\triangle ABC$ s vrcholy
+	\[
+	A=(60,60),\quad B=(120,30),\quad C=(120,80).
+	\]
+	
+	\subsection*{Grafické znázornění}
+	
+	\begin{center}
+		\begin{tikzpicture}[scale=0.045]
+			% osy
+			\draw[->, thick] (-5,0) -- (180,0) node[right]{$x_1$};
+			\draw[->, thick] (0,-5) -- (0,110) node[above]{$x_2$};
+			\foreach \x in {30,60,90,120,150} \draw (\x,-2) -- (\x,2) node[below=4pt]{\scriptsize $\x$};
+			\foreach \y in {20,40,60,80,100} \draw (-2,\y) -- (2,\y) node[left=4pt]{\scriptsize $\y$};
+			
+			% L1: x1 + 2 x2 = 180   ( bod (0,90)-(180,0) )
+			\draw[thick,blue] (0,90) -- (180,0) node[pos=0.18,above right,blue]{\scriptsize $L_1: x_1+2x_2=180$};
+			% L2: x1 = 120
+			\draw[thick,red] (120,-2) -- (120,110) node[pos=0.95,right,red]{\scriptsize $L_2: x_1=120$};
+			% L3: x1 - 3 x2 = -120  ->  x2 = (x1+120)/3   prochazi (0,40), (120,80), (180,100)
+			\draw[thick,green!60!black] (-3,39) -- (180,100) node[pos=0.6,below right,green!60!black]{\scriptsize $L_3: x_1-3x_2=-120$};
+			
+			% vyplnena pripustna oblast (trojuhelnik A B C)
+			\fill[gray!30,opacity=0.7] (60,60) -- (120,30) -- (120,80) -- cycle;
+			
+			% vrcholy
+			\filldraw[black] (60,60) circle (1.2) node[above left]{\scriptsize $A(60,60)$};
+			\filldraw[black] (120,30) circle (1.2) node[below right]{\scriptsize $B(120,30)$};
+			\filldraw[black] (120,80) circle (1.2) node[above right]{\scriptsize $C(120,80)$};
+			
+			% vrstevnice z = 1380 prochazi A:  -17 x1 + 40 x2 = 1380
+			% x2 = (1380 + 17 x1)/40 -> v (0, 34.5), (120, 85.5)
+			\draw[dashed,orange,thick] (0,34.5) -- (140,94) node[right,orange]{\scriptsize $z=1380$};
+			% gradient
+			\draw[->,thick,purple] (60,60) -- (52,79) node[above]{\scriptsize $\nabla z=(-17,40)$};
+		\end{tikzpicture}
+	\end{center}
+	
+	\subsection*{Hodnoty účelové funkce v základních (krajních) řešeních}
+	
+	Vrcholy přípustného polytopu jsou \emph{základní přípustná řešení}:
+	\[
+	\begin{array}{|c|c|c|}
+		\hline
+		\text{Vrchol} & (x_1,x_2) & z = -17x_1+40x_2 \\\hline
+		A & (60,60)  & -1020+2400 = \mathbf{1380} \\
+		B & (120,30) & -2040+1200 = -840 \\
+		C & (120,80) & -2040+3200 = 1160 \\\hline
+	\end{array}
+	\]
+	
+	\subsection*{Optimální řešení}
+	
+	Maximum je dosaženo v jediném vrcholu
+	\[
+	\boxed{\;x_1^*=60,\quad x_2^*=60,\quad z^* = 1380.\;}
+	\]
+	
+	Že jde o jediné optimum, ověříme směrově: gradient $\nabla z=(-17,40)$. Hrana $A\to B$ má směr $(60,-30)\sim(2,-1)$ se skalárním součinem $-17\cdot 2+40\cdot(-1)=-74<0$ (tj.\ $z$ klesá). Hrana $A\to C$ má směr $(60,20)\sim(3,1)$ se skalárním součinem $-51+40=-11<0$ ($z$ rovněž klesá). Žádná hrana z~$A$ není kolmá na $\nabla z$, tedy alternativní optimum neexistuje a optimum je jednoznačné.
+	
+	%==============================================================
+	\section*{Úkol 2 -- Pivovar}
+	
+	\subsection*{a) Proměnné a model}
+	
+	\textbf{Proměnné:}
+	\begin{itemize}[leftmargin=*]
+		\item $x_1 \geq 0$ \dots\ litry světlého piva za týden,
+		\item $x_2 \geq 0$ \dots\ litry polotmavého piva za týden,
+		\item $x_3 \geq 0$ \dots\ litry tmavého piva za týden.
+	\end{itemize}
+	
+	\textbf{Účelová funkce} (týdenní tržby v Kč):
+	\[
+	z = 27x_1 + 29x_2 + 35x_3 \quad\to\quad \max.
+	\]
+	
+	\textbf{Omezení.} Spotřeba sladu je $0{,}2x_1+0{,}25x_2+0{,}28x_3$ kg a nesmí překročit zásobu 150~kg. Spotřeba chmele $3x_1+2x_2+2{,}3x_3$ g nesmí překročit $2\,\mathrm{kg}=2000$~g. Pracovní čas brigádníka je omezen 40~hodinami týdně. Kvasnic je prakticky neomezené množství (nezavádí omezení), nicméně pro úplnost lze formálně psát $1\cdot x_1+1{,}5x_2+2x_3 \leq M$ s $M\to\infty$. Záporná výroba nemá smysl.
+	
+	\[
+	\begin{array}{rrcrcrcl}
+		\text{(slad)}    & 0{,}20\,x_1 &+& 0{,}25\,x_2 &+& 0{,}28\,x_3 &\leq& 150,\\[1pt]
+		\text{(chmel)}   & 3\,x_1      &+& 2\,x_2      &+& 2{,}3\,x_3  &\leq& 2000,\\[1pt]
+		\text{(čas)}     & 0{,}05\,x_1 &+& 0{,}04\,x_2 &+& 0{,}06\,x_3 &\leq& 40,\\[1pt]
+		& x_1,\, x_2,\, x_3 &&&&&\geq& 0.
+	\end{array}
+	\]
+	
+	\subsection*{b) Optimální řešení}
+	
+	Úlohu řešíme simplexovou metodou (resp.\ libovolným LP řešičem, viz Apendix~A). Optimum:
+	\[
+	\boxed{\;x_1^* = \tfrac{10\,750}{19}\approx 565{,}79,\quad x_2^*=0,\quad x_3^*=\tfrac{2500}{19}\approx 131{,}58,\quad z^*=\tfrac{377\,750}{19}\approx 19\,881{,}58~\text{Kč}.\;}
+	\]
+	
+	\subsection*{c) Zbylé suroviny}
+	
+	Dosazením optima:
+	\[
+	\begin{aligned}
+		\text{slad:}\ &0{,}2\cdot 565{,}79+0{,}28\cdot 131{,}58 = 113{,}158+36{,}842 = 150 \Rightarrow \text{zbývá } 0~\text{kg},\\
+		\text{chmel:}\ &3\cdot 565{,}79+2{,}3\cdot 131{,}58 = 1697{,}37+302{,}63 = 2000 \Rightarrow \text{zbývá } 0~\text{g},\\
+		\text{čas:}\ &0{,}05\cdot 565{,}79+0{,}06\cdot 131{,}58 = 28{,}289+7{,}895 = 36{,}184 \Rightarrow \text{zbývá cca } 3{,}82~\text{h}.
+	\end{aligned}
+	\]
+	Aktivní (vyčerpaná) jsou tedy omezení sladu a chmele; čas je \emph{neaktivní}, brigádník nepracuje na plno.
+	
+	\subsection*{d) Hodina práce navíc}
+	
+	Protože omezení času není v optimu aktivní (zbývá $\approx 3{,}82$~h volných), \textbf{prodloužení pracovní doby o jednu hodinu nepřinese žádné dodatečné tržby}. Stínová cena (duální proměnná) omezení času je v optimu nulová,
+	\[
+	\frac{\partial z^*}{\partial b_{\text{čas}}}=0,
+	\]
+	takže zvýšení kapacity času z 40 na 41 hodin ponechá optimální plán i hodnotu $z^*$ beze změny.
+	
+	\subsection*{e) Fixní náklady na zavedení výroby}
+	
+	Zavedeme binární proměnné $y_i\in\{0,1\}$ pro $i\in\{1,2,3\}$ s významem ,,druh~$i$ se vůbec vyrábí``. Pro každou položku přidáme \emph{velké--$M$} omezení provazující $x_i$ s $y_i$:
+	\[
+	x_i \leq M_i\, y_i,\qquad i=1,2,3,
+	\]
+	kde $M_i$ je dostatečně velká horní mez možné produkce (např.\ $M_i = \min\{150/a_{1i},\,2000/a_{2i},\,40/a_{4i}\}$, tedy individuální maximum dané surovinami). Účelová funkce se sníží o fixní náklady:
+	\[
+	z = 27x_1+29x_2+35x_3 - 400(y_1+y_2+y_3) \;\to\;\max.
+	\]
+	Z LP úlohy se tak stává smíšeně celočíselné programování (MILP).
+	
+	\subsection*{f) Maximálně dva typy piva}
+	
+	Použijeme tytéž binární proměnné $y_i$ s vazbami $x_i\le M_i y_i$ a přidáme omezení, že lze ,,zapnout`` nejvýše dvě:
+	\[
+	y_1 + y_2 + y_3 \leq 2,\qquad y_i\in\{0,1\}.
+	\]
+	Účelová funkce zůstává $z=27x_1+29x_2+35x_3$ (bez fixních nákladů), pokud body~e) a~f) neuvažujeme současně.
+	
+	%==============================================================
+	\section*{Úkol 3 -- Distribuce počítačů}
+	
+	\subsection*{a) Proměnné a model}
+	
+	Označme střediska $i\in\{1,2,3\}=\{\text{Plzeň},\text{Pardubice},\text{Olomouc}\}$ a odběratele $j\in\{1,2,3,4\}=\{\text{Brno},\text{Praha},\text{Ostrava},\text{Liberec}\}$. Definujeme
+	\[
+	x_{ij}\in\mathbb{Z}_{\geq 0} \;\dots\; \text{počet jízd dodávky (kapacita 60 ks) z~}i\text{ do~}j.
+	\]
+	Matice nákladů na jednu jízdu (tis.\ Kč):
+	\[
+	C=\begin{pmatrix}11&4&17&9\\6&7&10&8\\3&9&5&12\end{pmatrix}.
+	\]
+	
+	\textbf{Účelová funkce} (celkové náklady v tis.\ Kč):
+	\[
+	z=\sum_{i=1}^{3}\sum_{j=1}^{4} c_{ij}\,x_{ij}\;\to\;\min.
+	\]
+	
+	\textbf{Omezení.} Kapacita každého střediska v ks: počet vyvezených ks z~$i$ je $60\sum_j x_{ij}$ a nesmí překročit $K_i\in\{400,200,250\}$:
+	\[
+	60\sum_{j=1}^{4} x_{ij} \;\leq\; K_i \quad \text{pro } i=1,2,3.
+	\]
+	Požadavky odběratelů $D_j\in\{180,250,160,110\}$ musí být uspokojeny (dodáno alespoň tolik ks):
+	\[
+	60\sum_{i=1}^{3} x_{ij} \;\geq\; D_j \quad \text{pro } j=1,2,3,4.
+	\]
+	Celočíselnost a nezápornost: $x_{ij}\in\mathbb{Z}_{\geq 0}$.
+	
+	\subsection*{b) Optimální řešení}
+	
+	Řešením celočíselné úlohy (viz Apendix~B) je matice plánu jízd
+	\[
+	X^*=
+	\begin{pmatrix}
+		0 & 5 & 0 & 1 \\
+		2 & 0 & 0 & 1 \\
+		1 & 0 & 3 & 0
+	\end{pmatrix}
+	\quad\text{(řádky: Plzeň, Pardubice, Olomouc; sloupce: Brno, Praha, Ostrava, Liberec).}
+	\]
+	
+	Celkové náklady:
+	\[
+	z^* = 5\cdot 4 + 1\cdot 9 + 2\cdot 6 + 1\cdot 8 + 1\cdot 3 + 3\cdot 5 = 20+9+12+8+3+15 = \mathbf{67}~\text{tis.\ Kč.}
+	\]
+	
+	Kontrola dodávek a využití kapacit:
+	\[
+	\begin{array}{lcccc}
+		\text{Odběratel:} & \text{Brno} & \text{Praha} & \text{Ostrava} & \text{Liberec}\\
+		\text{Dodáno (ks):} & 180 & 300 & 180 & 120 \\
+		\text{Požadavek:}  & 180 & 250 & 160 & 110 \\
+	\end{array}
+	\qquad
+	\begin{array}{lccc}
+		\text{Středisko:} & \text{Plz.} & \text{Pard.} & \text{Olom.} \\
+		\text{Vyvezeno (ks):} & 360 & 180 & 240 \\
+		\text{Kapacita:}    & 400 & 200 & 250 \\
+	\end{array}
+	\]
+	Všechny požadavky jsou splněny, žádná kapacita není překročena. (Některé dodávky jsou vyšší než smluvní minimum, což plyne z diskrétnosti dodávek po 60~ks.)
+	
+	\subsection*{c) Řidič z Pardubic na Moravu max.\ jednou měsíčně}
+	
+	Řidič z~Pardubic ($i=2$) jede na Moravu právě tehdy, když cílí do~Brna ($j=1$) nebo do~Ostravy ($j=3$). Podmínka má tvar
+	\[
+	x_{2,1} + x_{2,3} \;\leq\; 1.
+	\]
+	
+	\subsection*{d) Fixní poplatek 450 tis.\ Kč za každou použitou trasu}
+	
+	Pro každou dvojici $(i,j)$ zavedeme indikátor $y_{ij}\in\{0,1\}$ s významem ,,trasa $i\to j$ je použita``. Vazbu mezi $x_{ij}$ a $y_{ij}$ zajistíme přes ,,velké~$M$``:
+	\[
+	x_{ij} \leq M_{ij}\, y_{ij},\qquad y_{ij}\in\{0,1\},\qquad \forall i,j,
+	\]
+	kde lze volit $M_{ij}=\lceil K_i/60 \rceil$ (maximální možný počet jízd ze střediska~$i$). Účelovou funkci pak rozšíříme o fixní poplatky:
+	\[
+	z = \sum_{i,j} c_{ij}\,x_{ij} \;+\; 450\sum_{i,j} y_{ij} \;\to\;\min.
+	\]
+	Úloha tím přechází z čistě celočíselného transportního programu na MILP s pevnými náklady (\emph{fixed-charge transportation problem}).
+	
+	%==============================================================
+	\section*{Úkol 4 -- TSP heuristika pro \texttt{uy734}}
+	
+	\subsection*{a) Popis algoritmu}
+	
+	Použili jsme dvoustupňovou heuristiku:
+	
+	\paragraph{Krok 1: Nearest Neighbor (NN) -- konstrukce počátečního turné.}
+	Začneme v libovolném startovním městě (zvolíme město č.~0). V každém kroku z~aktuálního města $v$ navštívíme nejbližší dosud nenavštívené město $u$:
+	\[
+	u = \arg\min_{w\in V\setminus T}\, d(v,w),
+	\]
+	kde $d$ je euklidovská vzdálenost a $T$ je dosud sestavené turné. Po navštívení všech měst se vrátíme do~startu. Časová složitost je $O(n^2)$.
+	
+	\paragraph{Krok 2: 2-opt -- lokální vylepšování.}
+	Mějme turné $\pi=(v_0,v_1,\ldots,v_{n-1},v_0)$. Pro každou dvojici hran $(v_i,v_{i+1})$ a $(v_j,v_{j+1})$ s~$i+1<j$ uvažujeme \emph{2-opt swap}: hrany odstraníme a nahradíme je hranami $(v_i,v_j)$ a $(v_{i+1},v_{j+1})$, což odpovídá obrácení segmentu $v_{i+1},\ldots,v_j$. Pokud
+	\[
+	\Delta = d(v_i,v_j)+d(v_{i+1},v_{j+1}) - d(v_i,v_{i+1}) - d(v_j,v_{j+1}) < 0,
+	\]
+	swap provedeme. Iterujeme, dokud existuje zlepšující výměna (\emph{first improvement} nebo \emph{best improvement}). Algoritmus konverguje do 2-optimálního turné, ze kterého žádná jediná dvojhranová výměna nedokáže snížit délku.
+	
+	\paragraph{Vzdálenosti.}
+	Standardní formát \texttt{TSPLIB} pro \texttt{uy734} je \texttt{EUC\_2D} -- vzdálenosti se zaokrouhlují na nejbližší celé číslo (\texttt{nint}). Pro porovnání s~optimem (79\,114) je nutné počítat délky stejně.
+	
+	\subsection*{b) Srovnání s optimem}
+	
+	Pro instanci \texttt{uy734} (734 měst v~Uruguayi) je známé optimum
+	\[
+	L^{\text{opt}} = 79\,114.
+	\]
+	Konkrétní výsledky našeho běhu (Python, start v~městě č.~0, \emph{first-improvement} 2-opt do úplné konvergence -- viz Apendix~C):
+	\[
+	\begin{array}{lccr}
+		\text{metoda} & \text{délka } L & \text{relativní mezera } (L-L^{\text{opt}})/L^{\text{opt}} & \text{čas}\\\hline
+		\text{Nearest Neighbor (start 0)} & 99\,247 & 25{,}45\,\% & 0{,}01~\text{s}\\
+		\text{NN + 2-opt}                 & 84\,269 & 6{,}52\,\% & 0{,}85~\text{s}\\
+	\end{array}
+	\]
+	Samotný Nearest Neighbor je tedy o~čtvrtinu horší než optimum, což je obvyklé. Po~aplikaci 2-opt klesne mezera pod 7~\%, přičemž algoritmus skončí v~lokálním (2-)optimu, ze kterého žádná dvojhranová výměna nedokáže turné dále zkrátit. Konkrétní hodnota závisí na startovním městě a varianty 2-optu (\emph{first} vs.\ \emph{best improvement}), případně na restartování z~více NN řešení; pro porovnání s~optimem se počítá s~\texttt{EUC\_2D} (zaokrouhlené euklidovské vzdálenosti).
+	
+	%==============================================================
+	\appendix
+	\section*{Apendix A -- Skript pro Úkol 2 (LP)}
+	\begin{lstlisting}
+		from scipy.optimize import linprog
+		
+		# max  27 x1 + 29 x2 + 35 x3   ->   min  -27 x1 - 29 x2 - 35 x3
+		c = [-27, -29, -35]
+		
+		# Omezeni:  slad, chmel, cas
+		A = [[0.20, 0.25, 0.28],   # slad   <= 150 kg
+		[3.00, 2.00, 2.30],   # chmel  <= 2000 g
+		[0.05, 0.04, 0.06]]   # cas    <= 40 h
+		b = [150, 2000, 40]
+		
+		res = linprog(c, A_ub=A, b_ub=b, bounds=[(0, None)] * 3, method="highs")
+		
+		print("Optimalni vyroba (l):", res.x)
+		print("Trzby (Kc):", -res.fun)
+		print("Zbyly slad (kg):", 150  - sum(A[0][i] * res.x[i] for i in range(3)))
+		print("Zbyly chmel (g):", 2000 - sum(A[1][i] * res.x[i] for i in range(3)))
+		print("Zbyly cas  (h):",  40   - sum(A[2][i] * res.x[i] for i in range(3)))
+	\end{lstlisting}
+	
+	\section*{Apendix B -- Skript pro Úkol 3 (MILP)}
+	\begin{lstlisting}
+		import numpy as np
+		from scipy.optimize import milp, LinearConstraint, Bounds
+		
+		# x_ij  ...  pocet jizd ze strediska i do odberatele j (60 ks na jizdu)
+		costs = np.array([[11, 4, 17, 9],   # Plzen
+		[ 6, 7, 10, 8],   # Pardubice
+		[ 3, 9,  5,12]])  # Olomouc
+		caps  = [400, 200, 250]             # ks
+		dems  = [180, 250, 160, 110]        # ks
+		
+		c = costs.flatten().astype(float)
+		
+		A_rows, b_ub = [], []
+		# kapacity:  60 * sum_j x_ij  <=  caps_i
+		for i in range(3):
+		row = [0] * 12
+		for j in range(4):
+		row[i * 4 + j] = 60
+		A_rows.append(row); b_ub.append(caps[i])
+		
+		# pozadavky:  60 * sum_i x_ij  >=  dems_j  ->  -60 sum  <=  -dems_j
+		for j in range(4):
+		row = [0] * 12
+		for i in range(3):
+		row[i * 4 + j] = -60
+		A_rows.append(row); b_ub.append(-dems[j])
+		
+		A_ub = np.array(A_rows)
+		constr = LinearConstraint(A_ub, -np.inf, b_ub)
+		
+		res = milp(c, constraints=constr, integrality=np.ones(12),
+		bounds=Bounds(lb=0, ub=np.inf))
+		
+		X = res.x.reshape(3, 4)
+		print("Plan jizd:\n", X.astype(int))
+		print("Naklady (tis. Kc):", res.fun)
+		print("Vyvezeno (ks):", (X.sum(axis=1) * 60).astype(int))
+		print("Dodano   (ks):", (X.sum(axis=0) * 60).astype(int))
+	\end{lstlisting}
+	
+	\section*{Apendix C -- Skript pro Úkol 4 (TSP heuristika)}
+	\begin{lstlisting}
+		import urllib.request, math, time
+		
+		URL = "http://www.math.uwaterloo.ca/tsp/world/uy734.tsp"
+		
+		def load_tsplib(url):
+		"""Stahne EUC_2D TSPLIB instanci a vrati seznam (x, y)."""
+		raw = urllib.request.urlopen(url).read().decode()
+		coords, in_section = [], False
+		for line in raw.splitlines():
+		s = line.strip()
+		if s.startswith("NODE_COORD_SECTION"):
+		in_section = True; continue
+		if s in ("EOF", ""):
+		if in_section: break
+		else: continue
+		if in_section:
+		parts = s.split()
+		coords.append((float(parts[1]), float(parts[2])))
+		return coords
+		
+		def dist(a, b):
+		"""TSPLIB EUC_2D: zaokrouhleni na nejblizsi cele cislo."""
+		return int(round(math.hypot(a[0] - b[0], a[1] - b[1])))
+		
+		def tour_length(tour, coords):
+		n = len(tour)
+		return sum(dist(coords[tour[i]], coords[tour[(i + 1) % n]]) for i in range(n))
+		
+		def nearest_neighbor(coords, start=0):
+		n = len(coords)
+		visited = [False] * n
+		tour = [start]; visited[start] = True
+		for _ in range(n - 1):
+		cur = tour[-1]
+		best, best_d = -1, float("inf")
+		for j in range(n):
+		if not visited[j]:
+		d = dist(coords[cur], coords[j])
+		if d < best_d:
+		best, best_d = j, d
+		tour.append(best); visited[best] = True
+		return tour
+		
+		def two_opt(tour, coords):
+		"""First-improvement 2-opt do uplne konvergence."""
+		n = len(tour)
+		improved = True
+		while improved:
+		improved = False
+		for i in range(n - 1):
+		a, b = tour[i], tour[i + 1]
+		for j in range(i + 2, n):
+		c = tour[j]
+		d = tour[(j + 1) % n]
+		if i == 0 and (j + 1) % n == 0:
+		continue
+		delta = (dist(coords[a], coords[c]) + dist(coords[b], coords[d])
+		- dist(coords[a], coords[b]) - dist(coords[c], coords[d]))
+		if delta < 0:
+		tour[i + 1:j + 1] = tour[i + 1:j + 1][::-1]
+		improved = True
+		break
+		if improved:
+		break
+		return tour
+		
+		if __name__ == "__main__":
+		coords = load_tsplib(URL)
+		print(f"Nacteno {len(coords)} mest.")
+		
+		t0 = time.time()
+		nn_tour = nearest_neighbor(coords, start=0)
+		print(f"NN delka      = {tour_length(nn_tour, coords):>7d}"
+		f"  ({time.time() - t0:.1f}s)")
+		
+		t0 = time.time()
+		opt_tour = two_opt(nn_tour[:], coords)
+		print(f"NN+2opt delka = {tour_length(opt_tour, coords):>7d}"
+		f"  ({time.time() - t0:.1f}s)")
+		
+		print("Optimum (uy734) = 79114")
+	\end{lstlisting}
+	
+\end{document}

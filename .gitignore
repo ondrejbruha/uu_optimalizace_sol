@@ -1,0 +1,6 @@
+/.venv
+*.aux
+*.log
+*.out
+*.gz
+*.tsp
